@@ -36,14 +36,14 @@ export const sendOtp = async (req, res) => {
     const existingUser = await USER.findOne({ Email });
     if (existingUser) return res.status(400).json({ msg: "User already exists" });
 
-    // ✅ Check if an OTP was recently sent (within 60 seconds)
+    // ✅ Check if an OTP was recently sent (within 15 seconds)
     const lastOtp = await OtpModel.findOne({ email: Email }).sort({ createdAt: -1 });
 
     if (lastOtp) {
       const timeElapsed = (Date.now() - new Date(lastOtp.createdAt)) / 1000;
-      if (timeElapsed < 60) {
+      if (timeElapsed < 15) {
         return res.status(429).json({
-          msg: `Please wait ${Math.ceil(60 - timeElapsed)} seconds before requesting a new OTP.`
+          msg: `Please wait ${Math.ceil(15 - timeElapsed)} seconds before requesting a new OTP.`
         });
       }
     }
