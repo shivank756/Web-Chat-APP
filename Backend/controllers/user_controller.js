@@ -6,23 +6,61 @@ import jwt from "jsonwebtoken";
 import { sendOtpEmail } from "../utils/sendOtpEmail.js";
 
 // ✅ Send OTP to user's email
+// export const sendOtp = async (req, res) => {
+//   try {
+//     const { Email } = req.body;
+//     if (!Email) return res.status(400).json({ msg: "Email is required" });
+
+//     const existingUser = await USER.findOne({ Email });
+//     if (existingUser) return res.status(400).json({ msg: "User already exists" });
+
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+//     await OtpModel.create({ email: Email, otp });
+
+//     await sendOtpEmail(Email, otp);
+
+//     res.status(200).json({ msg: "OTP sent to your email" });
+//   } catch (err) {
+//     console.error("Error sending OTP:", err);
+//     res.status(500).json({ msg: "Failed to send OTP" });
+//   }
+// };
+
 export const sendOtp = async (req, res) => {
   try {
     const { Email } = req.body;
     if (!Email) return res.status(400).json({ msg: "Email is required" });
 
+    // ❌ Don't allow OTP request if user already registered
     const existingUser = await USER.findOne({ Email });
     if (existingUser) return res.status(400).json({ msg: "User already exists" });
 
+    // ✅ Check if an OTP was recently sent (within 60 seconds)
+    const lastOtp = await OtpModel.findOne({ email: Email }).sort({ createdAt: -1 });
+
+    if (lastOtp) {
+      const timeElapsed = (Date.now() - new Date(lastOtp.createdAt)) / 1000;
+      if (timeElapsed < 60) {
+        return res.status(429).json({
+          msg: `Please wait ${Math.ceil(60 - timeElapsed)} seconds before requesting a new OTP.`
+        });
+      }
+    }
+
+    // ✅ Generate new OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // ✅ Save OTP in database
     await OtpModel.create({ email: Email, otp });
 
+    // ✅ Send OTP email
     await sendOtpEmail(Email, otp);
 
-    res.status(200).json({ msg: "OTP sent to your email" });
+    res.status(200).json({ msg: "📨 OTP sent to your email." });
+
   } catch (err) {
-    console.error("Error sending OTP:", err);
+    console.error("❌ Error sending OTP:", err);
     res.status(500).json({ msg: "Failed to send OTP" });
   }
 };
