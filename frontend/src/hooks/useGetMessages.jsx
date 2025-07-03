@@ -24,7 +24,7 @@ export default function useGetMessages() {
             try {
                 if (!selectedUser?._id) return;
                 axios.defaults.withCredentials = true;
-                const res = await axios.get(`http://localhost:3000/api/v1/message/${selectedUser?._id}`);
+                const res = await axios.get(`https://web-chat-app-u7yl.onrender.com/api/v1/message/${selectedUser?._id}`);
                 // const res = await axios.get(`http://192.168.1.9:3000/api/v1/message/${selectedUser?._id}`);
 
                 //console.log("messages",res.data);
