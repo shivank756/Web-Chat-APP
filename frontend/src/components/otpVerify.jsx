@@ -104,7 +104,7 @@ export default function OtpVerify() {
     if (timer > 0) return;
 
     try {
-      await axios.post('http://localhost:3000/api/v1/user/send-otp',
+      await axios.post('https://web-chat-app-u7yl.onrender.com/api/v1/user/send-otp',
         { Email: email },
         {
           headers: { 'Content-Type': 'application/json' },
