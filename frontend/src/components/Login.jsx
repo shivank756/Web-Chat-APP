@@ -17,7 +17,7 @@ function Login() {
         const { username, password } = user;
         try {
             const res = await axios.post(
-                'http://localhost:3000/api/v1/user/login',
+                'https://web-chat-app-u7yl.onrender.com',
                 {
                     UserName: username,
                     Password: password,
