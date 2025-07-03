@@ -14,7 +14,7 @@ export default function OtpVerify() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/user/register', {
+      const response = await axios.post('https://web-chat-app-u7yl.onrender.com/api/v1/user/register', {
         ...location.state.userData, // includes FullName, UserName, Password etc.
         otp,
       }, {
