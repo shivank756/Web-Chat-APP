@@ -1,5 +1,5 @@
 
-
+import { Message } from "../models/messageModel";
 
 import { Server } from "socket.io";
 import http from "http";
@@ -45,9 +45,21 @@ io.on('connection', (socket) => {
   });
 
   // ✅ Message marked as read
-  socket.on("messageRead", (messageId) => {
-    io.emit("messageReadStatusUpdate", { messageId, status: "read" });
+  // socket.on("messageRead", (messageId) => {
+  //   io.emit("messageReadStatusUpdate", { messageId, status: "read" });
+  // });
+
+  socket.on("messageRead", async (messageId) => {
+  // ✅ Update message status in MongoDB
+  await Message.findByIdAndUpdate(messageId, {
+    status: "read",
+    readAt: new Date()
   });
+
+  // ✅ Notify sender if online
+  io.emit("messageReadStatusUpdate", { messageId, status: "read" });
+});
+  
 
   socket.on('disconnect', () => {
     console.log('🔌 user disconnected', socket.id);
