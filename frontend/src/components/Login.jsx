@@ -95,31 +95,29 @@ import { setAuthUser } from '../Redux/userSlice';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
-  const [user, setUser] = useState({
+  const [user, setuser] = useState({
     username: '',
     password: '',
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const usernameRef = useRef(null);
   const passwordRef = useRef(null);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // ✅ Autofocus on username on mount
   useEffect(() => {
     usernameRef.current?.focus();
   }, []);
 
-  const onSubmitHandler = async (e) => {
+  const onsubmithandler = async (e) => {
     e.preventDefault();
-
     const { username, password } = user;
 
-    if (/\s/.test(username)) {
-      toast.error("❌ Username cannot contain spaces.");
+    if (!username || !password) {
+      toast.error("⚠️ Please fill in all fields");
       return;
     }
 
@@ -136,15 +134,15 @@ function Login() {
           withCredentials: true,
         }
       );
-
+      navigate('/');
       dispatch(setAuthUser(res.data));
       localStorage.setItem('authUser', JSON.stringify(res.data));
       toast.success(`✅ ${res.data.message || 'Login successful'}`);
-      setUser({ username: '', password: '' });
-      navigate('/');
+      setuser({ username: '', password: '' });
     } catch (error) {
       const msg = error.response?.data?.message || 'Something went wrong';
       toast.error(`❌ ${msg}`);
+      console.error('Login failed:', error);
     } finally {
       setLoading(false);
     }
@@ -153,7 +151,11 @@ function Login() {
   const handleKeyDown = (e, field) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (field === 'username') passwordRef.current?.focus();
+      if (field === 'username') {
+        passwordRef.current?.focus();
+      } else if (field === 'password') {
+        onsubmithandler(e);
+      }
     }
   };
 
@@ -161,7 +163,8 @@ function Login() {
     <div className='min-w-100 max-w-auto'>
       <div className='h-full w-full p-6 shadow-md rounded-lg bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200'>
         <h1 className='text-3xl font-bold text-center'>Login</h1>
-        <form onSubmit={onSubmitHandler}>
+        <form onSubmit={onsubmithandler}>
+
           {/* Username */}
           <div>
             <label className='label p-2'>
@@ -170,10 +173,9 @@ function Login() {
             <input
               ref={usernameRef}
               value={user.username}
-              onChange={(e) => {
-                const noSpaces = e.target.value.replace(/\s/g, '');
-                setUser({ ...user, username: noSpaces });
-              }}
+              onChange={(e) =>
+                setuser({ ...user, username: e.target.value.replace(/\s/g, '') }) // no space
+              }
               onKeyDown={(e) => handleKeyDown(e, 'username')}
               className='w-full input rounded-2xl h-10'
               type='text'
@@ -189,7 +191,8 @@ function Login() {
             <input
               ref={passwordRef}
               value={user.password}
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              onChange={(e) => setuser({ ...user, password: e.target.value })}
+              onKeyDown={(e) => handleKeyDown(e, 'password')}
               className='w-full input rounded-2xl h-10 pr-10'
               type={showPassword ? 'text' : 'password'}
               placeholder='Enter Your Password'
@@ -203,13 +206,11 @@ function Login() {
             </button>
           </div>
 
-          {/* Link to Signup */}
-          <Link to='/register'>
-            <p className='text-center my-1'>
-              Don't Have an Account?
-              <button className='btn btn-ghost'>Signup</button>
-            </p>
-          </Link>
+          {/* Signup Link */}
+          <p className='text-center my-1'>
+            Don't Have an Account?
+            <Link to='/register' className='btn btn-ghost ml-1'>Signup</Link>
+          </p>
 
           {/* Submit */}
           <div>
