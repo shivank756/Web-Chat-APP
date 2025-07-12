@@ -86,7 +86,7 @@
 //         </div>
 
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -95,22 +95,34 @@ import { setAuthUser } from '../Redux/userSlice';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
-  const [user, setuser] = useState({
+  const [user, setUser] = useState({
     username: '',
     password: '',
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const usernameRef = useRef(null);
   const passwordRef = useRef(null);
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const onsubmithandler = async (e) => {
+  // ✅ Autofocus on username on mount
+  useEffect(() => {
+    usernameRef.current?.focus();
+  }, []);
+
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
+
     const { username, password } = user;
+
+    if (/\s/.test(username)) {
+      toast.error("❌ Username cannot contain spaces.");
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await axios.post(
@@ -124,15 +136,15 @@ function Login() {
           withCredentials: true,
         }
       );
-      navigate('/');
+
       dispatch(setAuthUser(res.data));
       localStorage.setItem('authUser', JSON.stringify(res.data));
       toast.success(`✅ ${res.data.message || 'Login successful'}`);
-      setuser({ username: '', password: '' });
+      setUser({ username: '', password: '' });
+      navigate('/');
     } catch (error) {
       const msg = error.response?.data?.message || 'Something went wrong';
       toast.error(`❌ ${msg}`);
-      console.error('Login failed:', error);
     } finally {
       setLoading(false);
     }
@@ -140,6 +152,7 @@ function Login() {
 
   const handleKeyDown = (e, field) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       if (field === 'username') passwordRef.current?.focus();
     }
   };
@@ -148,7 +161,8 @@ function Login() {
     <div className='min-w-100 max-w-auto'>
       <div className='h-full w-full p-6 shadow-md rounded-lg bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-200'>
         <h1 className='text-3xl font-bold text-center'>Login</h1>
-        <form onSubmit={onsubmithandler}>
+        <form onSubmit={onSubmitHandler}>
+          {/* Username */}
           <div>
             <label className='label p-2'>
               <span className='text-base label-text text-center'>User Name</span>
@@ -156,7 +170,10 @@ function Login() {
             <input
               ref={usernameRef}
               value={user.username}
-              onChange={(e) => setuser({ ...user, username: e.target.value })}
+              onChange={(e) => {
+                const noSpaces = e.target.value.replace(/\s/g, '');
+                setUser({ ...user, username: noSpaces });
+              }}
               onKeyDown={(e) => handleKeyDown(e, 'username')}
               className='w-full input rounded-2xl h-10'
               type='text'
@@ -164,6 +181,7 @@ function Login() {
             />
           </div>
 
+          {/* Password */}
           <div className='relative'>
             <label className='label p-2'>
               <span className='text-base label-text text-center'>Password</span>
@@ -171,8 +189,7 @@ function Login() {
             <input
               ref={passwordRef}
               value={user.password}
-              onChange={(e) => setuser({ ...user, password: e.target.value })}
-              onKeyDown={(e) => e.key === 'Enter' && onsubmithandler(e)}
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
               className='w-full input rounded-2xl h-10 pr-10'
               type={showPassword ? 'text' : 'password'}
               placeholder='Enter Your Password'
@@ -186,13 +203,15 @@ function Login() {
             </button>
           </div>
 
+          {/* Link to Signup */}
           <Link to='/register'>
             <p className='text-center my-1'>
               Don't Have an Account?
-              <button className='btn btn-ghost'>Signup</button>{' '}
+              <button className='btn btn-ghost'>Signup</button>
             </p>
           </Link>
 
+          {/* Submit */}
           <div>
             <button
               type='submit'
@@ -209,8 +228,3 @@ function Login() {
 }
 
 export default Login;
-
-//     )
-// }
-
-// export default Login
