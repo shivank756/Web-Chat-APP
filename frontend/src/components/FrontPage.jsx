@@ -114,7 +114,7 @@ export default function TypingWords() {
 
         <div className="space-y-4">
           <div className="flex justify-center items-center gap-2">
-            <p className="text-gray-300 font-bold text-xl">Already have an account
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 font-bold">Already have an account
               ☺️<Link to="/login">
                 <button className="btn btn-sm rounded-xl bg-white text-black hover:bg-gray-300 shadow-md">
                   Login
@@ -124,7 +124,7 @@ export default function TypingWords() {
           </div>
 
           <div className="flex justify-center items-center gap-2">
-            <p className="text-gray-300 font-bold text-xl">Don't have an account😏</p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 font-bold">Don't have an account😏</p>
             <Link to="/register">
               <button className="btn btn-sm rounded-xl bg-white text-black hover:bg-gray-300 shadow-md">
                 Signup
