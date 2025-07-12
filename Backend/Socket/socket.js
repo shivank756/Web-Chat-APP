@@ -1,5 +1,5 @@
 
-import { Message } from "../models/messageModel";
+import { Message } from "../models/messageModel.js";
 
 import { Server } from "socket.io";
 import http from "http";
